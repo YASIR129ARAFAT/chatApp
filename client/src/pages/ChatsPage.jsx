@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import {io} from 'socket.io-client'
-const socket =  io.connect("http://localhost:8000")
+import { connect, io } from "socket.io-client";
+const socket = io.connect("http://localhost:8000");
 
 function ChatsPage() {
-
-
-
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
 
@@ -15,14 +12,20 @@ function ChatsPage() {
 
   const handleClick = (e) => {
     e.preventDefault();
-    if (message.trim() !== "") {
-      socket.emit('send_message',message,"secondAgr","thirdArg",{name:"yasir",age:22})
-    }
-    setChats((prev)=>{
-      return [...prev,message]
-    })
-    setMessage("")
   };
+
+  socket.on("connect", () => {
+    const username = prompt("enter your name: ");
+    socket.emit("user connected", username); // this is different than below
+    // this will be caught on server side
+
+    socket.on("user connected", (name) => {
+      alert(`user connected: ${name}`);
+    });
+    socket.on("user disconnected", (id) => {
+      alert(`user disconnected: ${id}`);
+    });
+  });
 
   return (
     <div className="flex p-2 flex-col bg-gray-700 w-full h-screen">

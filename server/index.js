@@ -19,19 +19,30 @@ const { Server } = require('socket.io')
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
-        methods:["GET","POST"],
+        methods: ["GET", "POST"],
     }
 })
 
 io.on('connection', (socket) => {
+    // socket.broadcast.emit('user connected',socket.id)
     console.log('Received connection');
     console.log(`message from server side... user connected with id: ${socket.id}`);
 
+    socket.on('user connected',(username)=>{
+        console.log("new user connected with username: ",username);
+        socket.broadcast.emit("user connected",username)
+    })
     socket.on('error', (error) => {
         console.error('WebSocket error:', error);
     });
-    socket.on('send_message',(message,arg2,arg3,myObj)=>{ // recieve the args in same order as sent.
-        console.log("message recieved from client: " ,message,arg2,arg3,myObj);
+    socket.on('send_message', (message, arg2, arg3, myObj) => { // recieve the args in same order as sent.
+        console.log("message recieved from client: ", message, arg2, arg3, myObj);
+    })
+
+    socket.on('disconnect',()=>{
+   
+        console.log(`User disconned with id: `,socket.id);
+        socket.broadcast.emit('user disconnected',socket.id)
     })
 });
 
@@ -44,10 +55,6 @@ dotenv.config({}) // you can give options like path etc
 // app.get('/', (req, res) => {
 //     res.send("server is ready")
 // })
-
-
-
-
 
 
 ////////////////////////////////
